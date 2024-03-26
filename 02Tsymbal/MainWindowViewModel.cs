@@ -1,3 +1,5 @@
+using _02Tsymbal.CustomException;
+
 namespace _02Tsymbal;
 
 using System;
@@ -41,18 +43,20 @@ public class MainWindowViewModel : ViewModelBase
         {
             await Task.Run(() =>
             {
-                if (!Person.IsAdult || Person.BirthDate > DateTime.Today ||
-                    Person.BirthDate < DateTime.Today.AddYears(-135))
+                if (Person.BirthDate < DateTime.Today.AddYears(-135))
                 {
-                    MessageBox.Show("Invalid age!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                    return;
+                    throw new TooOldDateException();
+                }
+
+                if (Person.BirthDate > DateTime.Today)
+                {
+                    throw new FutureDateException();
                 }
 
                 var email = Person.Email;
-                if (!email.Contains("@") || !email.Contains(".") || email.IndexOf("@") > email.LastIndexOf("."))
+                if (isValidEmail(email))
                 {
-                    MessageBox.Show("Invalid email!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                    return;
+                    throw new InvalidEmailException();
                 }
 
                 if (Person.IsBirthday)
@@ -71,7 +75,12 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"An error occurred: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show($"{ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
+    }
+
+    private bool isValidEmail(string email)
+    {
+        return !email.Contains("@") || !email.Contains(".") || email.IndexOf("@") > email.LastIndexOf(".");
     }
 }
